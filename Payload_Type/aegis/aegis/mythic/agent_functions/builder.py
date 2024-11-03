@@ -162,7 +162,7 @@ class aegis(PayloadType):
             rid = self.getRid(agent_config.SelectedOS,agent_config_dict["arch"])
             build_command = self.getBuildCommand(rid, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
-            agent_build_path2 = os.mkdir(os.path.join("/","tmp",self.uuid+2))
+            agent_build_path2 = os.mkdir(os.path.join("/","tmp",self.uuid+"2"))
             if self.get_parameter("output-type") == "app bundle":
                 if agent_config.SelectedOS.upper() != "MACOS":
                     return await self.returnFailure(resp, "Error building payload: App Bundles are only supported on MacOS", "Error occurred while building payload. Check stderr for more information.")
