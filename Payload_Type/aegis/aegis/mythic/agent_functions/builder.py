@@ -148,9 +148,7 @@ class aegis(PayloadType):
                 return self.returnFailure(resp, "Unable to find payload???", "Unable to find payload???")
 
             agent_config = agent_search_response.Payloads[0]
-            for k,v in agent_config.BuildParameters[0]:
-                print(k)
-                print(v)
+            print(agent_config.BuildParameters)
 
             if agent_config.BuildParameters["single-file"] == True or agent_config.BuildParameters["self-contained"] == True:
                 return self.returnFailure(resp, "Payloads should not be single-file or self-contained when using this loader.")
