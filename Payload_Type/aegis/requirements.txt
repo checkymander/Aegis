@@ -1,0 +1,4 @@
+pycryptodome
+mythic-container
+pefile
+py2app
