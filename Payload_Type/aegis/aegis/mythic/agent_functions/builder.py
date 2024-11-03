@@ -29,7 +29,7 @@ class aegis(PayloadType):
     note = """Protect your goddess"""
     supports_dynamic_loading = True  # setting this to True allows users to only select a subset of commands when generating a payload
     agent_path = pathlib.Path(".") / "aegis" / "mythic"
-    agent_code_path = pathlib.Path(".") / "aegis"  / "agent_code"
+    agent_code_path = pathlib.Path(".") / "aegis"  / "agent_code" / "Aegis"
     agent_icon_path = agent_path / "agent_functions" / "aegis.svg"
     build_steps = [
         BuildStep(step_name="Precheck", step_description="Chacking Agent Build Config"),
@@ -101,7 +101,7 @@ class aegis(PayloadType):
         return dll_files
 
     def addEvasion(self, agent_build_path, profile):
-        project_path = os.path.join(agent_build_path.name, "Aegis", "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
+        project_path = os.path.join(agent_build_path.name, "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
         p = subprocess.Popen(["dotnet", "add", "Aegis", "reference", project_path], cwd=agent_build_path.name)
         p.wait()
         
