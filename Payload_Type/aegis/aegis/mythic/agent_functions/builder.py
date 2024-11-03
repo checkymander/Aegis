@@ -149,19 +149,18 @@ class aegis(PayloadType):
 
 
             agent_config = agent_search_response.Payloads[0]
-            with open('/tmp/data.json', 'w') as f:
-                for b in agent_config.BuildParameters:
-                    f.write(str(b.Name))
-                    f.write(str(b.Value))
+            agent_config_dict = {}
+            for kvp in agent_config.BuildParameters:
+                agent_config_dict[kvp.Name] = kvp.Value
 
             for x in agent_config.BuildParameters:
                 print(x)
 
-            if agent_config.BuildParameters["single-file"] == True or agent_config.BuildParameters["self-contained"] == True:
+            if agent_config_dict["single-file"] == True or agent_config_dict["self-contained"] == True:
                 return self.returnFailure(resp, "Payloads should not be single-file or self-contained when using this loader.")
 
-            rid = self.get_rid(agent_config.SelectedOS,agent_config.BuildParameters["arch"])
-            build_command = self.getBuildCommand(rid, agent_config.BuildParameters["configuration"])
+            rid = self.get_rid(agent_config.SelectedOS,agent_config_dict["arch"])
+            build_command = self.getBuildCommand(rid, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
 
             # make a Temporary Directory for the payload files
