@@ -150,7 +150,8 @@ class aegis(PayloadType):
 
             agent_config = agent_search_response.Payloads[0]
             with open('/tmp/data.json', 'w') as f:
-                json.dump(agent_config, f)
+                f.write(agent_config.to_json())
+                
             for x in agent_config.BuildParameters:
                 print(x)
 
