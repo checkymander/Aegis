@@ -148,7 +148,6 @@ class aegis(PayloadType):
                 return self.returnFailure(resp, "Unable to find payload???", "Unable to find payload???")
 
             agent_config = agent_search_response.Payloads[0]
-            print(agent_config.BuildParameters.count())
             for k,v in agent_config.BuildParameters[0]:
                 print(k)
                 print(v)
