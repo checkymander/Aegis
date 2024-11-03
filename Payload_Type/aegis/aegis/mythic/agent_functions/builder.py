@@ -47,13 +47,13 @@ class aegis(PayloadType):
             default_value="Plaintext",
             description="Obfuscation to apply to agent files before load"
         ),
-        # BuildParameter(
-        #     name="sandbox-evasion",
-        #     parameter_type=BuildParameterType.ChooseMultiple,
-        #     choices = ["delay-execution", "calculate-pi", "domain-lookup"],
-        #     default_value="",
-        #     description="Add anti-sandbox evasions to the loader"
-        # ), 
+        BuildParameter(
+            name="sandbox-evasion",
+            parameter_type=BuildParameterType.ChooseMultiple,
+            choices = ["delay-execution", "calculate-pi", "domain-lookup"],
+            default_value=[],
+            description="Add anti-sandbox evasions to the loader"
+        ), 
         BuildParameter(
             name="output-type",
             parameter_type=BuildParameterType.ChooseOne,
