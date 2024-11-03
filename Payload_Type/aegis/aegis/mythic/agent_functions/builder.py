@@ -175,7 +175,7 @@ class aegis(PayloadType):
             )) 
             # Copy files into the temp directory
             copy_tree(self.agent_code_path, agent_build_path.name)
-            copy_tree(self.agent_code_path,agent_build_path2)
+            copy_tree(self.agent_code_path, os.path.join("/","tmp",self.uuid+"2"))
             # Get Zip File from buffer
             z = zipfile.ZipFile(io.BytesIO(agent_payload_zip_bytes))
 
