@@ -191,7 +191,7 @@ class aegis(PayloadType):
                 StepSuccess=True
             )) 
 
-            self.addLoader(self.agent_build_path, self.get_paramter("obfuscation-type"))
+            self.addLoader(agent_build_path, self.get_parameter("obfuscation-type"))
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
                 StepName="Obfuscating DLLs",
@@ -200,7 +200,7 @@ class aegis(PayloadType):
             )) 
 
             for evasion in self.get_parameter("sandbox-evasion"):
-                self.addEvasion(self.agent_build_path, evasion)
+                self.addEvasion(agent_build_path, evasion)
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
