@@ -101,7 +101,7 @@ class aegis(PayloadType):
         return dll_files
 
     def addEvasion(self, agent_build_path, profile):
-        project_path = os.path.join(agent_build_path.name, "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
+        project_path = os.path.join(agent_build_path.name, "Aegis", "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
         p = subprocess.Popen(["dotnet", "add", "Aegis", "reference", project_path], cwd=agent_build_path.name)
         p.wait()
         
