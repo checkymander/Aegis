@@ -158,8 +158,8 @@ class aegis(PayloadType):
 
             if agent_config_dict["single-file"] == True or agent_config_dict["self-contained"] == True:
                 return self.returnFailure(resp, "Payloads should not be single-file or self-contained when using this loader.")
-
-            rid = self.get_rid(agent_config.SelectedOS,agent_config_dict["arch"])
+            
+            rid = self.getRid(agent_config.SelectedOS,agent_config_dict["arch"])
             build_command = self.getBuildCommand(rid, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
 
