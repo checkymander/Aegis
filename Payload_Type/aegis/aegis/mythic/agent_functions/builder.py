@@ -147,7 +147,10 @@ class aegis(PayloadType):
             if not agent_search_response.Success:
                 return self.returnFailure(resp, "Unable to find payload???", "Unable to find payload???")
 
+
             agent_config = agent_search_response.Payloads[0]
+            with open('/tmp/data.json', 'w') as f:
+                json.dump(agent_config, f)
             for x in agent_config.BuildParameters:
                 print(x)
 
