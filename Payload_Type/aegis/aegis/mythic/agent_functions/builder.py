@@ -128,7 +128,7 @@ class aegis(PayloadType):
         elif selected_os.upper() == "REDHAT":
             return "rhel-x64"
 
-    async def getBuildCommand(self, rid, configuration):
+    def getBuildCommand(self, rid, configuration):
              return "dotnet publish Aegis -r {} -c {} --nologo --self-contained={} /p:PublishSingleFile={} /p:EnableCompressionInSingleFile={} /p:DebugType=None /p:DebugSymbols=false".format(
                 rid, 
                 configuration, 
