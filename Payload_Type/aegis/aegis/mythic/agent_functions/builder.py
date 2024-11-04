@@ -180,7 +180,7 @@ class aegis(PayloadType):
             # Unzip into our AgentFiles to be processed by 
             z.extractall(os.path.join(self.agent_code_path,"AgentFiles"))
             z.extractall(os.path.join("/","tmp",self.uuid+"2","AgentFiles"))
-            
+
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
                 StepName="Gathering DLLs",
@@ -242,7 +242,8 @@ class aegis(PayloadType):
 
             #If we get here, the path should exist since the build succeeded
             if self.selected_os.lower() == "windows" and self.get_parameter("configuration") != "Debug":
-                await self.prepareWinExe(output_path) #Force it to be headless
+                #await self.prepareWinExe(output_path) #Force it to be headless
+                print("Test")
 
             # if self.get_parameter("output-type") == "app bundle":
             #     mac_bundler.create_app_bundle("Agent", os.path.join(output_path, "Agent"), output_path)

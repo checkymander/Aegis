@@ -15,11 +15,12 @@ namespace Aegis.Loader
             List<string> excludedDlls = new List<string>() {"Agent.dll","Agent.Models.dll" };
             var alc = AssemblyLoadContext.Default;
             var asmExe = Assembly.GetExecutingAssembly();
-
+            Console.WriteLine("Getting Executing Assembly.");
             if (asmExe == null)
             {
                 return;
             }
+            Console.WriteLine("Getting Models Dll");
 
             //Gotta load this one first since all the others basically rely on it
             Stream modelStream = asmExe.GetManifestResourceStream("Aegis.Loader.Plaintext.Agent.Models.dll");
@@ -38,14 +39,14 @@ namespace Aegis.Loader
                 {
                     continue;
                 }
-
+                Console.WriteLine($"Loading {aa}");
                 Stream s = asmExe.GetManifestResourceStream(aa);
                 if (s != null)
                 {
                     alc.LoadFromStream(s);
                 }
             }
-
+            Console.WriteLine($"Loading Agent");
             // Get the entry point method
             Stream ad = asmExe.GetManifestResourceStream("Aegis.Loader.Plaintext.Agent.dll");
             Assembly agent;
@@ -58,6 +59,7 @@ namespace Aegis.Loader
 
             // Invoke the entry point method
             object[] parameters = new object[] { new string[0] }; // You can pass command-line arguments
+            Console.WriteLine("Executing Agent.");
             entryPoint.Invoke(null, null);
         }
     }
