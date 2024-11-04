@@ -13,6 +13,7 @@ import json
 import pefile
 import io
 import zipfile
+import time
 
 # define your payload type class here, it must extend the PayloadType class though
 class aegis(PayloadType):
@@ -221,6 +222,7 @@ class aegis(PayloadType):
             print("stdout: " + str(output))
             print("stderr: " + str(err))
             sys.stdout.flush()
+            time.sleep(60)
 
             if proc.returncode != 0:
                 await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
