@@ -1,10 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;DebugEncrypt;DebugPlaintext</Configurations>
   </PropertyGroup>
-
+	<ItemGroup Condition="'$(Configuration)'=='DebugPlaintext'">
+		<ProjectReference Include="..\Aegis.Loader.Plaintext\Aegis.Loader.Plaintext.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='DebugEncrypt'">
+		<ProjectReference Include="..\Aegis.Loader.Aes\Aegis.Loader.Aes.csproj" />
+	</ItemGroup>
 </Project>

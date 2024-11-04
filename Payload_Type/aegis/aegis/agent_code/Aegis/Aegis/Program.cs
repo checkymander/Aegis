@@ -1,2 +1,13 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using Aegis.Loader;
+
+namespace Aegis
+{
+    public static class Program
+    {
+        public static async Task Main(string[] args)
+        {
+            AgentLoader ldr = new AgentLoader();
+            await ldr.Go();
+        }
+    }
+}

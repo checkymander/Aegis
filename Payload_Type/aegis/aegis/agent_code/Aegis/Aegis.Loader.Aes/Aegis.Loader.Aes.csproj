@@ -4,8 +4,12 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Configurations>Debug;Release;DebugEncrypt;DebugPlaintext</Configurations>
   </PropertyGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="../AgentFiles/*.bin" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Aegis.Models\Aegis.Models.csproj" />
 	</ItemGroup>
 </Project>
