@@ -20,10 +20,17 @@ namespace Aegis.Loader
             {
                 return;
             }
+
+            List<string> sources = asmExe.GetManifestResourceNames().ToList();
+
+            foreach(var blah in sources)
+            {
+                Console.WriteLine(blah);
+            }
             Console.WriteLine("Getting Models Dll");
 
             //Gotta load this one first since all the others basically rely on it
-            Stream modelStream = asmExe.GetManifestResourceStream("Aegis.Loader.Plaintext.Agent.Models.dll");
+            Stream modelStream = asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.Models.dll")));
 
             if (modelStream == null)
             {
@@ -33,7 +40,7 @@ namespace Aegis.Loader
             alc.LoadFromStream(modelStream);
 
             //Load the rest of the DLLs except for the agent
-            foreach (string aa in asmExe.GetManifestResourceNames())
+            foreach (string aa in sources)
             {
                 if (excludedDlls.Contains(aa))
                 {
@@ -48,7 +55,7 @@ namespace Aegis.Loader
             }
             Console.WriteLine($"Loading Agent");
             // Get the entry point method
-            Stream ad = asmExe.GetManifestResourceStream("Aegis.Loader.Plaintext.Agent.dll");
+            Stream ad = asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.dll")));
             Assembly agent;
             if (ad == null)
             {
