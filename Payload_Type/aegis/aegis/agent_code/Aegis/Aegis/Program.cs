@@ -8,6 +8,7 @@ namespace Aegis
         {
             AgentLoader ldr = new AgentLoader();
             await ldr.Go();
+            Console.ReadKey();
         }
     }
 }
