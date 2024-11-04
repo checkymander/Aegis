@@ -251,7 +251,7 @@ class aegis(PayloadType):
                 shutil.make_archive(f"{agent_build_path.name}/output", "zip", f"{agent_build_path.name}")
                 return await self.returnSuccess(resp, "File built succesfully!", agent_build_path)
             
-            output_path = "{}/{}/bin/{}/net7.0/{}/publish/".format(agent_build_path.name,agent_type,agent_config_dict["configuration"].capitalize(), rid)
+            output_path = "{}/{}/bin/{}/net8.0/{}/publish/".format(agent_build_path.name,agent_type,agent_config_dict["configuration"].capitalize(), rid)
 
 
             #Run command and get output
