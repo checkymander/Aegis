@@ -179,7 +179,7 @@ class aegis(PayloadType):
             z = zipfile.ZipFile(io.BytesIO(agent_payload_zip_bytes))
 
             # Unzip into our AgentFiles to be processed by 
-            z.extractall(os.path.join(self.agent_code_path,"AgentFiles"))
+            z.extractall(os.path.join(self.agent_code_path.name,"AgentFiles"))
             z.extractall(os.path.join("/","tmp",self.uuid+"2","AgentFiles"))
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
@@ -222,7 +222,7 @@ class aegis(PayloadType):
             print("stdout: " + str(output))
             print("stderr: " + str(err))
             sys.stdout.flush()
-            time.sleep(60)
+            #time.sleep(60)
 
             if proc.returncode != 0:
                 await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
