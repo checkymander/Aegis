@@ -179,7 +179,7 @@ class aegis(PayloadType):
             z = zipfile.ZipFile(io.BytesIO(agent_payload_zip_bytes))
 
             # Unzip into our AgentFiles to be processed by 
-            z.extractall(os.path.join(self.agent_code_path.name,"AgentFiles"))
+            z.extractall(os.path.join(agent_build_path.name,"AgentFiles"))
             z.extractall(os.path.join("/","tmp",self.uuid+"2","AgentFiles"))
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
