@@ -153,9 +153,6 @@ class aegis(PayloadType):
             for kvp in agent_config.BuildParameters:
                 agent_config_dict[kvp.Name] = kvp.Value
 
-            for x in agent_config.BuildParameters:
-                print(x)
-
             if agent_config_dict["single-file"] == True or agent_config_dict["self-contained"] == True:
                 return self.returnFailure(resp, "Payloads should not be single-file or self-contained when using this loader.")
             
@@ -163,6 +160,7 @@ class aegis(PayloadType):
             build_command = self.getBuildCommand(rid, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
             agent_build_path2 = os.mkdir(os.path.join("/","tmp",self.uuid+"2"))
+
             if self.get_parameter("output-type") == "app bundle":
                 if agent_config.SelectedOS.upper() != "MACOS":
                     return await self.returnFailure(resp, "Error building payload: App Bundles are only supported on MacOS", "Error occurred while building payload. Check stderr for more information.")
@@ -181,6 +179,8 @@ class aegis(PayloadType):
 
             # Unzip into our AgentFiles to be processed by 
             z.extractall(os.path.join(self.agent_code_path,"AgentFiles"))
+            z.extractall(os.path.join("/","tmp",self.uuid+"2","AgentFiles"))
+            
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
                 StepName="Gathering DLLs",
