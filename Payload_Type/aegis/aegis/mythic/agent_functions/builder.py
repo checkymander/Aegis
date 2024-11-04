@@ -14,6 +14,9 @@ import pefile
 import io
 import zipfile
 import time
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+import os
 
 # define your payload type class here, it must extend the PayloadType class though
 class aegis(PayloadType):
@@ -81,9 +84,33 @@ class aegis(PayloadType):
         p = subprocess.Popen(["dotnet", "add", "Aegis", "reference", project_path], cwd=agent_build_path.name)
         p.wait()
     
+
+    def encryptDLL(self, input_file_path, output_file_path, key):
+        # Generate a random 16-byte IV
+        iv = get_random_bytes(16)
+        
+        # Initialize AES cipher with the given key and IV in CBC mode
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        
+        # Read the DLL file
+        with open(input_file_path, 'rb') as f:
+            plaintext = f.read()
+        
+        # Pad the plaintext to be a multiple of AES block size (16 bytes)
+        padding_length = 16 - (len(plaintext) % 16)
+        plaintext += bytes([padding_length] * padding_length)
+        
+        # Encrypt the DLL content
+        ciphertext = cipher.encrypt(plaintext)
+        
+        # Write the IV and ciphertext to the output file
+        with open(output_file_path, 'wb') as f:
+            f.write(iv + ciphertext)
+
     def encryptDlls(self, agent_build_path):
         dll_files = self.getAgentDlls(agent_build_path)
-
+        for file in dll_files:
+            self.encryptDll(file, agent_build_path)
 
 
     def encodeDlls(self, agent_build_path):
