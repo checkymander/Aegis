@@ -90,13 +90,13 @@ class aegis(PayloadType):
         pe.close()
         os.remove(os.path.join(output_path, agent_exe))
         os.rename(os.path.join(output_path, "Aegis_Headless.exe"), os.path.join(output_path, agent_exe))
-
+    
     # These could be combined but that's a later problem.
     def addLoader(self, agent_build_path, command_name, agent_type):
         project_path = os.path.join(agent_build_path.name, "Aegis.Loader.{}".format(command_name), "Aegis.Loader.{}.csproj".format(command_name))
         p = subprocess.Popen(["dotnet", "add", agent_type, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
-    
+  
     def encryptDLL(self, input_file_path, output_file_path, key):
         # Generate a random 16-byte IV
         iv = get_random_bytes(16)

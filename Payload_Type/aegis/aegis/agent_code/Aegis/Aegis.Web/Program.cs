@@ -1,4 +1,4 @@
-﻿using Aegis.Loader;
+﻿using Aegis.Utilities;
 using Aegis.Models.Interfaces;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -9,6 +9,13 @@ namespace Aegis
     {
         public static async Task Main(string[] args)
         {
+            foreach(IMod mod in Helpers.ParseAssemblyForMods())
+            {
+                if(!await mod.Check())
+                {
+                    return;
+                }
+            }
             string url = "https://www.google.com";
             AssemblyLoadContext alc = AssemblyLoadContext.Default;
             Assembly asm;
@@ -25,7 +32,6 @@ namespace Aegis
                     asm = alc.LoadFromStream(streamToReadFrom);
                 }
             }
-
 
             ILoader ldr = ParseAssemblyForLoader(asm);
 
