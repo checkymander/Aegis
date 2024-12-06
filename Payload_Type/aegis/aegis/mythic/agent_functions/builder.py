@@ -132,7 +132,7 @@ class aegis(PayloadType):
         with open(output_file_path, 'wb') as f:
             f.write(iv + ciphertext)
     
-    async def encode_file(input_file_path, output_file_path):
+    async def encode_file(self, input_file_path, output_file_path):
         """
         Encodes a file's content with Base64 encoding.
 
