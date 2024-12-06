@@ -19,6 +19,10 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import os
 
+class TestTempDir:
+    def __init__(self, name):
+        self.name = name
+
 # define your payload type class here, it must extend the PayloadType class though
 class aegis(PayloadType):
     name = "aegis"  # name that would show up in the UI
@@ -149,25 +153,25 @@ class aegis(PayloadType):
 # Example usage
 # encrypt_file('example.txt', 'encrypted.bin', b'mysecretkey123456'
 
-    async def encryptDlls(self, agent_build_path, key, obfuscated_assembly_name):
+    async def encryptDlls(self, agent_build_path: tempfile.TemporaryDirectory, key, obfuscated_assembly_name):
         logger.critical("Encrypting dlls.")
         dll_files = self.getAgentDlls(agent_build_path, obfuscated_assembly_name)
         await self.update_placeholder(agent_build_path,"Aegis.Loader.Aes", key)
         await asyncio.gather(*[self.encrypt_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","bin"), key)) for i in dll_files])
 
-    async def encodeDlls(self, agent_build_path, obfuscated_assembly_name):
+    async def encodeDlls(self, agent_build_path: tempfile.TemporaryDirectory, obfuscated_assembly_name):
         logger.critical("Encoding dlls.")
         dll_files = self.getAgentDlls(agent_build_path, obfuscated_assembly_name)
         await asyncio.gather(*[self.encode_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","b64"))) for i in dll_files])
 
-    async def update_placeholder(self, agent_build_path, project, key):
+    async def update_placeholder(self, agent_build_path: tempfile.TemporaryDirectory, project, key):
         logger.critical("Updating placeholder")
         baseFile = open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "r").read()
         baseFile = baseFile.replace("%UUID%", key)
-        with open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "w") as f:
+        with open(f"{agent_build_path}/{project}/AgentLoader.cs", "w") as f:
             f.write(baseFile)  
 
-    def getAgentDlls(self, agent_build_path, obfuscated_assembly_name) -> list[str]:
+    def getAgentDlls(self, agent_build_path: tempfile.TemporaryDirectory, obfuscated_assembly_name) -> list[str]:
         dll_files = []
         # Iterate over files in the directory
         for filename in os.listdir(os.path.join(agent_build_path,"AgentFiles")):
@@ -181,7 +185,7 @@ class aegis(PayloadType):
                     dll_files.append(filename)
         return dll_files
     
-    def addEvasion(self, agent_build_path, profile, payload):
+    def addEvasion(self, agent_build_path: tempfile.TemporaryDirectory, profile, payload):
         project_path = os.path.join(agent_build_path.name, "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
         p = subprocess.Popen(["dotnet", "add", payload, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
@@ -244,7 +248,8 @@ class aegis(PayloadType):
             rid = self.getRid(agent_config.SelectedOS,agent_config_dict["arch"])
             build_command = self.getBuildCommand(rid, agent_type, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
-
+            #agent_build_path = os.mkdir(f"/tmp/{self.uuid}")
+            #agent_build_path = TestTempDir(os.mkdir(f"/tmp/{self.uuid}"))
             if self.get_parameter("output-type") == "app bundle":
                 if agent_config.SelectedOS.upper() != "MACOS":
                     return await self.returnFailure(resp, "Error building payload: App Bundles are only supported on MacOS", "Error occurred while building payload. Check stderr for more information.")
@@ -272,9 +277,9 @@ class aegis(PayloadType):
             logger.critical(obfuscation_type)
 
             if obfuscation_type == "aes":
-                await self.encryptDlls(self.agent_code_path, self.uuid, agent_config_dict["assemblyname"])
+                await self.encryptDlls(agent_build_path, self.uuid, agent_config_dict["assemblyname"])
             if obfuscation_type == "base64":
-                await self.encodeDlls(self.agent_code_path)
+                await self.encodeDlls(agent_build_path)
 
             # if str(self.get_parameter("obfuscation-type")).lower() != "plaintext":
             #     obfuscator_functions[str(self.get_parameter("obfuscation-type")).lower()]()
@@ -316,8 +321,8 @@ class aegis(PayloadType):
 
             #Run command and get output
             proc = await asyncio.create_subprocess_shell(build_command, stdout=asyncio.subprocess.PIPE,
-                                                         stderr=asyncio.subprocess.PIPE,
-                                                         cwd=agent_build_path.name)
+                                                        stderr=asyncio.subprocess.PIPE,
+                                                        cwd=agent_build_path.name)
             output, err = await proc.communicate()
             print("stdout: " + str(output))
             print("stderr: " + str(err))
