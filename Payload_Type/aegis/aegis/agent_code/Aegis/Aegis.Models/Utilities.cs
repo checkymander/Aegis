@@ -13,12 +13,12 @@ namespace Aegis.Utilities
         public static List<IMod> ParseAssemblyForMods()
         {
             List<IMod> mods = new List<IMod>();
-            List<string> potentialMods = new List<string>() { "DelayExecution", "CalculatePi", "DomainLookup" };
+            List<string> potentialMods = new List<string>() { "Delay", "DomainLookup", "PiCalc" };
             foreach (var mod in potentialMods)
             {
                 try
                 {
-                    Assembly _asm = Assembly.Load($"Aegis.Mods.{mod}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+                    Assembly _asm = Assembly.Load($"Aegis.Mod.{mod}, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
                     foreach (Type t in _asm.GetTypes())
                     {
                         if (typeof(IMod).IsAssignableFrom(t))

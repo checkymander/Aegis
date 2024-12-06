@@ -8,13 +8,14 @@ namespace Aegis.Mod.PiCalc
         public async Task<bool> Check()
         {
             int interations = 10;
-
+            Console.WriteLine("Calulating Pi 10x.");
             for (int i = 0; i < interations; i++)
             {
                 string pi = await F(i);
 
                 Thread.Sleep(30000);
             }
+            Console.WriteLine("Done.");
             return true;
         }
         public async Task<string> F(int digits)

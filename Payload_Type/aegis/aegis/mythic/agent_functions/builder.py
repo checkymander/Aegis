@@ -188,11 +188,16 @@ class aegis(PayloadType):
         return dll_files
     
     def addEvasion(self, agent_build_path: tempfile.TemporaryDirectory, profile, payload):
-        project_path = os.path.join(agent_build_path.name, "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
+        aegis_mod_map = {
+            "delay-execution":"Delay",
+            "calculate-pi":"PiCalc",
+            "domain-lookup":"DomainLookup",
+        }
+        project_path = os.path.join(agent_build_path.name, "Aegis.Mod.{}".format(aegis_mod_map[profile]), "Aegis.Mod.{}.csproj".format(aegis_mod_map[profile]))
         p = subprocess.Popen(["dotnet", "add", payload, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
         
-    async def returnSuccess(self, resp: BuildResponse, build_msg, agent_build_path) -> BuildResponse:
+    async def returnSuccess(self, resp: BuildResponse, build_msg, agent_build_path: tempfile.TemporaryDirectory) -> BuildResponse:
         resp.status = BuildStatus.Success
         resp.build_message = build_msg
         resp.payload = open(f"{agent_build_path.name}/output.zip", 'rb').read()

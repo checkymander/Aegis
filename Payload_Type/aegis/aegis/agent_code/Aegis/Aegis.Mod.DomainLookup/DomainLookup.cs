@@ -21,37 +21,38 @@ namespace Aegis.Mod.DomainLookup
         }
         public async Task<bool> Check()
         {
+            Console.WriteLine("Checking Domains.");
             List<string> j = new() {
-                "google.com",
-                "facebook.com",
-                "wikipedia.com",
-                "reddit.com",
-                "x.com",
-                "youtube.com",
-                "instagram.com",
-                "yahoo.com",
-                "cnn.com",
-                "msnbc.com",
-                "fox.com",
-                "foxnews.com",
-                "chatgpt.com",
-                "microsoftonline.com",
-                "netflix.com",
-                "bing.com",
-                "linkedin.com",
-                "office.com",
-                "amazon.com",
-                "weather.com"
+                "https://www.google.com",
+                "https://www.facebook.com",
+                "https://www.wikipedia.com",
+                "https://www.reddit.com",
+                "https://www.x.com",
+                "https://www.youtube.com",
+                "https://www.instagram.com",
+                "https://www.yahoo.com",
+                "https://www.cnn.com",
+                "https://www.msnbc.com",
+                "https://www.fox.com",
+                "https://www.foxnews.com",
+                "https://www.chatgpt.com",
+                "https://www.netflix.com",
+                "https://www.bing.com",
+                "https://www.linkedin.com",
+                "https://www.office.com",
+                "https://www.amazon.com",
+                "https://www.weather.com"
             };
 
             Shuffle(j);
-
+            Console.WriteLine("Done.");
             return await GetRequests(j);
         }
         private async Task<bool> GetRequests(List<string> urls)
         {
             foreach (string url in urls)
             {
+                Console.WriteLine(url);
                 try
                 {
                     HttpResponseMessage response = await httpClient.GetAsync(url);
