@@ -277,7 +277,7 @@ class aegis(PayloadType):
             logger.critical(obfuscation_type)
 
             if obfuscation_type == "aes":
-                await self.encryptDlls(agent_build_path, self.uuid, agent_config_dict["assemblyname"])
+                await self.encryptDlls(agent_build_path, self.uuid.replace('-',''), agent_config_dict["assemblyname"])
             if obfuscation_type == "base64":
                 await self.encodeDlls(agent_build_path)
 
