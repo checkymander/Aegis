@@ -337,7 +337,7 @@ class aegis(PayloadType):
             # if self.get_parameter("output-type") == "app bundle":
             #     mac_bundler.create_app_bundle("Agent", os.path.join(output_path, "Agent"), output_path)
             #     os.remove(os.path.join(output_path, "Agent"))
-            copy_tree(os.path.join(agent_build_path.name,"AgentFiles"), f"{agent_build_path.name}/output")
+            copy_tree(os.path.join(agent_build_path.name,"AgentFiles"), f"{agent_build_path.name}/output/dlls")
             shutil.make_archive(f"{agent_build_path.name}/output", "zip", f"{output_path}")  
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
