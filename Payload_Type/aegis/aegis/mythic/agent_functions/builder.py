@@ -149,15 +149,15 @@ class aegis(PayloadType):
 # Example usage
 # encrypt_file('example.txt', 'encrypted.bin', b'mysecretkey123456'
 
-    async def encryptDlls(self, agent_build_path, key):
+    async def encryptDlls(self, agent_build_path, key, obfuscated_assembly_name):
         logger.critical("Encrypting dlls.")
-        dll_files = self.getAgentDlls(agent_build_path)
+        dll_files = self.getAgentDlls(agent_build_path, obfuscated_assembly_name)
         self.update_placeholder(agent_build_path,"Aegis.Loader.Aes", key)
         await asyncio.gather(*[self.encrypt_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","bin"), key)) for i in dll_files])
 
-    async def encodeDlls(self, agent_build_path):
+    async def encodeDlls(self, agent_build_path, obfuscated_assembly_name):
         logger.critical("Encoding dlls.")
-        dll_files = self.getAgentDlls(agent_build_path)
+        dll_files = self.getAgentDlls(agent_build_path, obfuscated_assembly_name)
         await asyncio.gather(*[self.encode_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","b64"))) for i in dll_files])
 
     async def update_placeholder(self, agent_build_path, project, key):
@@ -272,7 +272,7 @@ class aegis(PayloadType):
             logger.critical(obfuscation_type)
 
             if obfuscation_type == "aes":
-                await self.encryptDlls(self.agent_code_path, self.uuid)
+                await self.encryptDlls(self.agent_code_path, self.uuid, agent_config_dict["assemblyname"])
             if obfuscation_type == "base64":
                 await self.encodeDlls(self.agent_code_path)
 
