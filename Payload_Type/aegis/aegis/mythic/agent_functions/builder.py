@@ -1,6 +1,7 @@
 from mythic_container.PayloadBuilder import *
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
+from mythic_container.logging import *
 from distutils.dir_util import copy_tree
 import asyncio
 import os
@@ -148,15 +149,18 @@ class aegis(PayloadType):
 # encrypt_file('example.txt', 'encrypted.bin', b'mysecretkey123456'
 
     async def encryptDlls(self, agent_build_path, key):
+        logger.critical("Encrypting dlls.")
         dll_files = self.getAgentDlls(agent_build_path)
         self.update_placeholder(agent_build_path,"Aegis.Loader.Aes", key)
         await asyncio.gather(*[self.encrypt_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","bin"), key)) for i in dll_files])
 
     async def encodeDlls(self, agent_build_path):
+        logger.critical("Encoding dlls.")
         dll_files = self.getAgentDlls(agent_build_path)
         await asyncio.gather(*[self.encode_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","b64"))) for i in dll_files])
 
     async def update_placeholder(self, agent_build_path, project, key):
+        logger.critical("Updating placeholder")
         baseFile = open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "r").read()
         baseFile = baseFile.replace("%UUID%", key)
         with open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "w") as f:
@@ -263,6 +267,7 @@ class aegis(PayloadType):
                 "base64": lambda: self.encodeDlls(self.agent_code_path),
             }
 
+            logger.critical(str(self.get_parameter("obfuscation-type")).lower())
             if str(self.get_parameter("obfuscation-type")).lower() is not "plaintext":
                 obfuscator_functions[str(self.get_parameter("obfuscation-type")).lower()]()
 
