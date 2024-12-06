@@ -9,7 +9,7 @@ namespace Aegis.Loader
     {
         public async Task Go()
         {
-            string key = "c4620ccd8f564e17b3454dfe5668f91e";
+            string key = "%UUID%";
             List<string> excludedDlls = new List<string>() { "Aegis.Loader.Agent.bin", "Aegis.Loader.Agent.Models.bin" };
             var alc = AssemblyLoadContext.Default;
             var asmExe = Assembly.GetExecutingAssembly();
