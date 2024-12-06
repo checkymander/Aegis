@@ -6,7 +6,6 @@ namespace Aegis.Mod.Delay
     {
         public async Task<bool> Check()
         {
-            Console.WriteLine("Delaying.");
             DateTime start = DateTime.Now;
             Random random = new Random();
             //int d = random.Next(60000, 600000);
@@ -21,13 +20,10 @@ namespace Aegis.Mod.Delay
             //If our number is significantly less than d (giving a 10% buffer) then we're being analyzed in a sandbox and should exit
             //Convert d to seconds and multiply by .9 to get a 10% differential
             //if (differential < ((d/1000) * 0.9))
-            Console.WriteLine("Differential: " + differential);
-            Console.WriteLine("Estimated Delay: " + d);
            if (differential < (d * 0.9))
            {
                 return false;
            }
-            Console.WriteLine("Done.");
             return true;
         }
         public double GetSecondsBetween(DateTime earlierTimestamp, DateTime laterTimestamp)

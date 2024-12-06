@@ -21,7 +21,6 @@ namespace Aegis.Mod.DomainLookup
         }
         public async Task<bool> Check()
         {
-            Console.WriteLine("Checking Domains.");
             List<string> j = new() {
                 "https://www.google.com",
                 "https://www.facebook.com",
@@ -45,14 +44,12 @@ namespace Aegis.Mod.DomainLookup
             };
 
             Shuffle(j);
-            Console.WriteLine("Done.");
             return await GetRequests(j);
         }
         private async Task<bool> GetRequests(List<string> urls)
         {
             foreach (string url in urls)
             {
-                Console.WriteLine(url);
                 try
                 {
                     HttpResponseMessage response = await httpClient.GetAsync(url);
