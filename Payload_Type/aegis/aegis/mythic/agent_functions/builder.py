@@ -157,7 +157,7 @@ class aegis(PayloadType):
         logger.critical("Encrypting dlls.")
         dll_files = self.getAgentDlls(agent_build_path, obfuscated_assembly_name)
         await self.update_placeholder(agent_build_path,"Aegis.Loader.Aes", key)
-        await asyncio.gather(*[self.encrypt_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","bin"), key)) for i in dll_files])
+        await asyncio.gather(*[self.encrypt_file(os.path.join(agent_build_path.name,"AgentFiles",i), os.path.join(agent_build_path.name,"AgentFiles",i.replace("dll","bin"), key)) for i in dll_files])
 
     async def encodeDlls(self, agent_build_path: tempfile.TemporaryDirectory, obfuscated_assembly_name):
         logger.critical("Encoding dlls.")
@@ -168,7 +168,7 @@ class aegis(PayloadType):
         logger.critical("Updating placeholder")
         baseFile = open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "r").read()
         baseFile = baseFile.replace("%UUID%", key)
-        with open(f"{agent_build_path}/{project}/AgentLoader.cs", "w") as f:
+        with open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "w") as f:
             f.write(baseFile)  
 
     def getAgentDlls(self, agent_build_path: tempfile.TemporaryDirectory, obfuscated_assembly_name) -> list[str]:
