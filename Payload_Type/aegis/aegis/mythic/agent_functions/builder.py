@@ -15,7 +15,7 @@ import io
 import zipfile
 import time
 from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
+from Crypto.Util.Padding import pad
 import os
 
 # define your payload type class here, it must extend the PayloadType class though
@@ -75,7 +75,7 @@ class aegis(PayloadType):
             name="output-type",
             parameter_type=BuildParameterType.ChooseOne,
             choices=["binary", 
-                     #"app bundle"
+                    #"app bundle"
                     ],
             default_value="binary",
             description="Compile the payload or provide the raw source code"
@@ -92,51 +92,91 @@ class aegis(PayloadType):
         os.rename(os.path.join(output_path, "Aegis_Headless.exe"), os.path.join(output_path, agent_exe))
     
     # These could be combined but that's a later problem.
-    def addLoader(self, agent_build_path, command_name, agent_type):
-        project_path = os.path.join(agent_build_path.name, "Aegis.Loader.{}".format(command_name), "Aegis.Loader.{}.csproj".format(command_name))
+    def addLoader(self, agent_build_path, obfuscation_type, agent_type):
+        project_path = os.path.join(agent_build_path.name, "Aegis.Loader.{}".format(obfuscation_type), "Aegis.Loader.{}.csproj".format(obfuscation_type))
         p = subprocess.Popen(["dotnet", "add", agent_type, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
-  
-    def encryptDLL(self, input_file_path, output_file_path, key):
-        # Generate a random 16-byte IV
-        iv = get_random_bytes(16)
-        
-        # Initialize AES cipher with the given key and IV in CBC mode
+
+    async def encrypt_file(input_file_path, output_file_path, key_str):
+        """
+        Encrypts a file using AES encryption.
+
+        Args:
+            input_file_path (str): Path to the file to encrypt.
+            output_file_path (str): Path to save the encrypted file.
+            key (bytes): Encryption key (must be 16, 24, or 32 bytes long).
+        """
+        key = key_str.encode('utf-8')
+        if len(key) not in [16, 24, 32]:
+            raise ValueError("Key must be 16, 24, or 32 bytes long.")
+
+        # Generate a random IV
+        iv = os.urandom(16)
+
+        # Create the cipher
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        
-        # Read the DLL file
+
         with open(input_file_path, 'rb') as f:
             plaintext = f.read()
-        
-        # Pad the plaintext to be a multiple of AES block size (16 bytes)
-        padding_length = 16 - (len(plaintext) % 16)
-        plaintext += bytes([padding_length] * padding_length)
-        
-        # Encrypt the DLL content
-        ciphertext = cipher.encrypt(plaintext)
-        
+
+        # Pad the plaintext and encrypt
+        ciphertext = cipher.encrypt(pad(plaintext, AES.block_size))
+
         # Write the IV and ciphertext to the output file
         with open(output_file_path, 'wb') as f:
             f.write(iv + ciphertext)
+    
+    async def encode_file(input_file_path, output_file_path):
+        """
+        Encodes a file's content with Base64 encoding.
 
-    def encryptDlls(self, agent_build_path):
+        Args:
+            input_file_path (str): Path to the file to encode.
+            output_file_path (str): Path to save the Base64 encoded file.
+        """
+        with open(input_file_path, 'rb') as input_file:
+            # Read the file's binary content
+            file_content = input_file.read()
+
+        # Encode the content in Base64
+        encoded_content = base64.b64encode(file_content)
+        encoded_content = encoded_content.encode('utf-8')
+        with open(output_file_path, 'wb') as output_file:
+            # Write the Base64 encoded content to the output file
+            output_file.write(encoded_content)
+        
+# Example usage
+# encrypt_file('example.txt', 'encrypted.bin', b'mysecretkey123456'
+
+    async def encryptDlls(self, agent_build_path, key):
         dll_files = self.getAgentDlls(agent_build_path)
-        for file in dll_files:
-            self.encryptDll(file, agent_build_path)
+        self.update_placeholder(agent_build_path,"Aegis.Loader.Aes", key)
+        await asyncio.gather(*[self.encrypt_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","bin"), key)) for i in dll_files])
 
-    def encodeDlls(self, agent_build_path):
+    async def encodeDlls(self, agent_build_path):
         dll_files = self.getAgentDlls(agent_build_path)
+        await asyncio.gather(*[self.encode_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","b64"))) for i in dll_files])
 
-    def getAgentDlls(self, agent_build_path) -> list[str]:
+    async def update_placeholder(self, agent_build_path, project, key):
+        baseFile = open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "r").read()
+        baseFile = baseFile.replace("%UUID%", key)
+        with open(f"{agent_build_path.name}/{project}/AgentLoader.cs", "w") as f:
+            f.write(baseFile)  
+
+    def getAgentDlls(self, agent_build_path, obfuscated_assembly_name) -> list[str]:
         dll_files = []
         # Iterate over files in the directory
         for filename in os.listdir(os.path.join(agent_build_path,"AgentFiles")):
             # Check if the file has a .dll extension
             if filename.lower().endswith('.dll'):
-                # Add the DLL file name to the array
-                dll_files.append(filename)
+                if obfuscated_assembly_name in filename:
+                    os.rename(os.path.join(agent_build_path,"AgentFiles",f"{obfuscated_assembly_name}.dll"), os.path.join(agent_build_path,"AgentFiles","Agent.dll"))
+                    dll_files.append("Agent.dll")
+                else:                    
+                    # Add the DLL file path to the array
+                    dll_files.append(filename)
         return dll_files
-
+    
     def addEvasion(self, agent_build_path, profile, payload):
         project_path = os.path.join(agent_build_path.name, "Aegis.Mods.{}".format(profile), "Aegis.Mods.{}.csproj".format(profile))
         p = subprocess.Popen(["dotnet", "add", payload, "reference", project_path], cwd=agent_build_path.name)
@@ -166,7 +206,7 @@ class aegis(PayloadType):
             return "rhel-x64"
 
     def getBuildCommand(self, rid, payload, configuration):
-             return "dotnet publish {} -r {} -c {} --nologo --self-contained={} /p:PublishSingleFile={} /p:EnableCompressionInSingleFile={} /p:DebugType=None /p:DebugSymbols=false".format(
+            return "dotnet publish {} -r {} -c {} --nologo --self-contained={} /p:PublishSingleFile={} /p:EnableCompressionInSingleFile={} /p:DebugType=None /p:DebugSymbols=false".format(
                 payload,
                 rid, 
                 configuration, 
@@ -218,6 +258,14 @@ class aegis(PayloadType):
 
             # Unzip into our AgentFiles to be processed by 
             z.extractall(os.path.join(agent_build_path.name,"AgentFiles"))
+            obfuscator_functions = {
+                "plaintext": None, # We don't need to do anything, but keep it in the lib just in case
+                "aes": self.encryptDlls(self.agent_code_path, self.uuid),
+                "base64": self.encodeDlls(self.agent_code_path, self.uuid),
+            }
+
+            if str(self.get_parameter("obfuscation-type")).lower() is not "plaintext":
+                obfuscator_functions[str(self.get_parameter("obfuscation-type")).lower()]()
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
                 PayloadUUID=self.uuid,
@@ -227,7 +275,7 @@ class aegis(PayloadType):
             )) 
 
             # Only need to add reference directly if we're using unstaged payloads, otherwise the dll will be downloaded by Aegis.Web
-            if self.get_parameter("loader-type") == "unstaged":
+            if str(self.get_parameter("loader-type")).lower() == "unstaged":
                 self.addLoader(agent_build_path, self.get_parameter("obfuscation-type"), agent_type)
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(

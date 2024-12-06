@@ -1,4 +1,5 @@
 ﻿using Aegis.Models.Interfaces;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -83,6 +84,14 @@ namespace Aegis.Loader
             {
                 return reader.ReadToEnd();
             }
+        }
+        /// <summary>
+        /// Base64 decode a string and return it as a byte array
+        /// </summary>
+        /// <param name="base64EncodedData">String to decode</param>
+        private static byte[] Base64DecodeToByteArray(string base64EncodedData)
+        {
+            return Convert.FromBase64String(base64EncodedData);
         }
     }
 }
