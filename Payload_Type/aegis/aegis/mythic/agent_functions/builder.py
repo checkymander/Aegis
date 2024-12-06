@@ -142,6 +142,7 @@ class aegis(PayloadType):
         # Encode the content in Base64
         encoded_content = base64.b64encode(file_content)
         with open(output_file_path, 'wb') as output_file:
+            logger.critical(f"Writing {output_file_path}")
             # Write the Base64 encoded content to the output file
             output_file.write(encoded_content)
         
