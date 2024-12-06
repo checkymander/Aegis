@@ -111,7 +111,7 @@ class aegis(PayloadType):
             output_file_path (str): Path to save the encrypted file.
             key (bytes): Encryption key (must be 16, 24, or 32 bytes long).
         """
-        logger.critical("Key " + key)
+        logger.critical("Key " + key_str)
         key = key_str.encode('utf-8')
         if len(key) not in [16, 24, 32]:
             raise ValueError("Key must be 16, 24, or 32 bytes long.")
