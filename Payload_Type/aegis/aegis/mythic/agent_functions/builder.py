@@ -52,7 +52,8 @@ class aegis(PayloadType):
         BuildParameter(
             name="loader-type",
             parameter_type=BuildParameterType.ChooseOne,
-            choices=["unstaged", "staged-web"],
+            #choices=["unstaged", "staged-web"],
+            choices=["unstaged"],
             default_value="unstaged",
             description="Make use of a staged or unstaged payload"
         ),
@@ -97,7 +98,7 @@ class aegis(PayloadType):
         os.rename(os.path.join(output_path, "Aegis_Headless.exe"), os.path.join(output_path, agent_exe))
     
     # These could be combined but that's a later problem.
-    def addLoader(self, agent_build_path, obfuscation_type, agent_type):
+    def addLoader(self, agent_build_path: tempfile.TemporaryDirectory, obfuscation_type, agent_type):
         project_path = os.path.join(agent_build_path.name, "Aegis.Loader.{}".format(obfuscation_type), "Aegis.Loader.{}.csproj".format(obfuscation_type))
         p = subprocess.Popen(["dotnet", "add", agent_type, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
@@ -249,8 +250,7 @@ class aegis(PayloadType):
             rid = self.getRid(agent_config.SelectedOS,agent_config_dict["arch"])
             build_command = self.getBuildCommand(rid, agent_type, agent_config_dict["configuration"])
             agent_build_path = tempfile.TemporaryDirectory(suffix=self.uuid)
-            #agent_build_path = os.mkdir(f"/tmp/{self.uuid}")
-            #agent_build_path = TestTempDir(os.mkdir(f"/tmp/{self.uuid}"))
+
             if self.get_parameter("output-type") == "app bundle":
                 if agent_config.SelectedOS.upper() != "MACOS":
                     return await self.returnFailure(resp, "Error building payload: App Bundles are only supported on MacOS", "Error occurred while building payload. Check stderr for more information.")
@@ -353,8 +353,8 @@ class aegis(PayloadType):
 
             #If we get here, the path should exist since the build succeeded
             if self.selected_os.lower() == "windows" and self.get_parameter("configuration") != "Debug":
-                #await self.prepareWinExe(output_path, agent_type) #Force it to be headless
-                print("Test")
+                await self.prepareWinExe(output_path, agent_type) #Force it to be headless
+                #print("Test")
 
             # if self.get_parameter("output-type") == "app bundle":
             #     mac_bundler.create_app_bundle("Agent", os.path.join(output_path, "Agent"), output_path)

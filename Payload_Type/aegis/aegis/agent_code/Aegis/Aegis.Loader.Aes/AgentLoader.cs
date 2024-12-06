@@ -13,7 +13,6 @@ namespace Aegis.Loader
             List<string> excludedDlls = new List<string>() { "Aegis.Loader.Agent.bin", "Aegis.Loader.Agent.Models.bin" };
             var alc = AssemblyLoadContext.Default;
             var asmExe = Assembly.GetExecutingAssembly();
-            Console.WriteLine("Getting Executing Assembly.");
             if (asmExe == null)
             {
                 return;
@@ -30,7 +29,6 @@ namespace Aegis.Loader
             //Load the rest of the DLLs except for the agent
             foreach (string aa in sources)
             {
-                Console.WriteLine(aa);
                 if (excludedDlls.Contains(aa))
                 {
                     continue;
@@ -65,7 +63,6 @@ namespace Aegis.Loader
 
             // Invoke the entry point method
             object[] parameters = new object[] { new string[0] }; // You can pass command-line arguments
-            Console.WriteLine("Executing Agent.");
             entryPoint.Invoke(null, parameters);
         }
     }
