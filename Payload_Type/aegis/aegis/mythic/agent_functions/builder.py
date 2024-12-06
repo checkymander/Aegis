@@ -281,6 +281,9 @@ class aegis(PayloadType):
                 await self.encryptDlls(agent_build_path, self.uuid.replace('-',''), agent_config_dict["assemblyname"])
             if obfuscation_type == "base64":
                 await self.encodeDlls(agent_build_path)
+            else:
+                #This just should rename the dll properly
+                await self.getAgentDlls(agent_build_path, agent_config_dict["assemblyname"])
 
             # if str(self.get_parameter("obfuscation-type")).lower() != "plaintext":
             #     obfuscator_functions[str(self.get_parameter("obfuscation-type")).lower()]()
