@@ -178,7 +178,7 @@ class aegis(PayloadType):
             # Check if the file has a .dll extension
             if filename.lower().endswith('.dll'):
                 if obfuscated_assembly_name in filename:
-                    os.rename(os.path.join(agent_build_path,"AgentFiles",f"{obfuscated_assembly_name}.dll"), os.path.join(agent_build_path,"AgentFiles","Agent.dll"))
+                    os.rename(os.path.join(agent_build_path.name,"AgentFiles",f"{obfuscated_assembly_name}.dll"), os.path.join(agent_build_path.name,"AgentFiles","Agent.dll"))
                     dll_files.append("Agent.dll")
                 else:                    
                     # Add the DLL file path to the array
