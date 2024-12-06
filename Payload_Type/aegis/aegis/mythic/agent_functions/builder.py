@@ -264,12 +264,12 @@ class aegis(PayloadType):
             z.extractall(os.path.join(agent_build_path.name,"AgentFiles"))
             obfuscator_functions = {
                 "plaintext": None, # We don't need to do anything, but keep it in the lib just in case
-                "aes": lambda: self.encryptDlls(self.agent_code_path, self.uuid),
-                "base64": lambda: self.encodeDlls(self.agent_code_path),
+                "aes": lambda: await self.encryptDlls(self.agent_code_path, self.uuid),
+                "base64": lambda: await self.encodeDlls(self.agent_code_path),
             }
 
             logger.critical(str(self.get_parameter("obfuscation-type")).lower())
-            if str(self.get_parameter("obfuscation-type")).lower() is not "plaintext":
+            if str(self.get_parameter("obfuscation-type")).lower() != "plaintext":
                 obfuscator_functions[str(self.get_parameter("obfuscation-type")).lower()]()
 
             await SendMythicRPCPayloadUpdatebuildStep(MythicRPCPayloadUpdateBuildStepMessage(
