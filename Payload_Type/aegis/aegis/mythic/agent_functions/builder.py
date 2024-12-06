@@ -102,7 +102,7 @@ class aegis(PayloadType):
         p = subprocess.Popen(["dotnet", "add", agent_type, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
 
-    async def encrypt_file(input_file_path, output_file_path, key_str):
+    async def encrypt_file(self, input_file_path, output_file_path, key_str):
         """
         Encrypts a file using AES encryption.
 
