@@ -140,7 +140,6 @@ class aegis(PayloadType):
 
         # Encode the content in Base64
         encoded_content = base64.b64encode(file_content)
-        encoded_content = encoded_content.encode('utf-8')
         with open(output_file_path, 'wb') as output_file:
             # Write the Base64 encoded content to the output file
             output_file.write(encoded_content)
@@ -261,7 +260,7 @@ class aegis(PayloadType):
             obfuscator_functions = {
                 "plaintext": None, # We don't need to do anything, but keep it in the lib just in case
                 "aes": self.encryptDlls(self.agent_code_path, self.uuid),
-                "base64": self.encodeDlls(self.agent_code_path, self.uuid),
+                "base64": self.encodeDlls(self.agent_code_path),
             }
 
             if str(self.get_parameter("obfuscation-type")).lower() is not "plaintext":
