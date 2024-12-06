@@ -174,7 +174,7 @@ class aegis(PayloadType):
     def getAgentDlls(self, agent_build_path: tempfile.TemporaryDirectory, obfuscated_assembly_name) -> list[str]:
         dll_files = []
         # Iterate over files in the directory
-        for filename in os.listdir(os.path.join(agent_build_path,"AgentFiles")):
+        for filename in os.listdir(os.path.join(agent_build_path.name,"AgentFiles")):
             # Check if the file has a .dll extension
             if filename.lower().endswith('.dll'):
                 if obfuscated_assembly_name in filename:
