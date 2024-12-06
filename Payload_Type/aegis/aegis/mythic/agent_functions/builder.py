@@ -163,7 +163,7 @@ class aegis(PayloadType):
     async def encodeDlls(self, agent_build_path: tempfile.TemporaryDirectory, obfuscated_assembly_name):
         logger.critical("Encoding dlls.")
         dll_files = self.getAgentDlls(agent_build_path, obfuscated_assembly_name)
-        await asyncio.gather(*[self.encode_file(os.path.join(agent_build_path,"AgentFiles",i), os.path.join(agent_build_path,"AgentFiles",i.replace("dll","b64"))) for i in dll_files])
+        await asyncio.gather(*[self.encode_file(os.path.join(agent_build_path.name,"AgentFiles",i), os.path.join(agent_build_path.name,"AgentFiles",i.replace("dll","b64"))) for i in dll_files])
 
     async def update_placeholder(self, agent_build_path: tempfile.TemporaryDirectory, project, key):
         logger.critical("Updating placeholder")
