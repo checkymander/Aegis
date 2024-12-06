@@ -74,7 +74,7 @@ namespace Aegis.Loader
             // Invoke the entry point method
             object[] parameters = new object[] { new string[0] }; // You can pass command-line arguments
             Console.WriteLine("Executing Agent.");
-            entryPoint.Invoke(null, null);
+            entryPoint.Invoke(null, parameters);
         }
         private string GetEmbeddedResourceAsString(string resourceName)
         {

@@ -356,7 +356,7 @@ class aegis(PayloadType):
             # if self.get_parameter("output-type") == "app bundle":
             #     mac_bundler.create_app_bundle("Agent", os.path.join(output_path, "Agent"), output_path)
             #     os.remove(os.path.join(output_path, "Agent"))
-            copy_tree(os.path.join(agent_build_path.name,"AgentFiles"), output_path)
+            #copy_tree(os.path.join(agent_build_path.name,"AgentFiles"), output_path)
             #shutil.make_archive(f"{agent_build_path.name}/output", "zip", f"{output_path}")
             shutil.make_archive(f"{agent_build_path.name}/output", "zip", f"{output_path}")  
 
