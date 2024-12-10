@@ -22,15 +22,17 @@ namespace Aegis.Loader
 
             List<string> sources = asmExe.GetManifestResourceNames().ToList();
 
-            //Gotta load this one first since all the others basically rely on it
-            Stream modelStream = asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.Models.dll")));
 
-            if (modelStream == null)
+            using (Stream modelStream = asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.Models.dll"))))
+            using (Stream decompressorStream = new MemoryStream())
             {
-                return;
+                if (modelStream == null)
+                {
+                    return;
+                }
+                FileDecompressor.DecompressStream(modelStream, decompressorStream);
+                alc.LoadFromStream(decompressorStream);
             }
-
-            alc.LoadFromStream(modelStream);
 
             //Load the rest of the DLLs except for the agent
             foreach (string aa in sources)
@@ -39,25 +41,35 @@ namespace Aegis.Loader
                 {
                     continue;
                 }
-                Stream s = asmExe.GetManifestResourceStream(aa);
-                if (s != null)
+                using (Stream s = asmExe.GetManifestResourceStream(aa))
+                using (Stream ds = new MemoryStream())
                 {
-                    alc.LoadFromStream(s);
+                    if (s == null)
+                    {
+                        return;
+                    }
+                    FileDecompressor.DecompressStream(s, ds);
+                    alc.LoadFromStream(ds);
                 }
             }
-            // Get the entry point method
-            Stream ad = asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.dll")));
-            Assembly agent;
-            if (ad == null)
-            {
-                return;
-            }
-            agent = alc.LoadFromStream(ad);
-            MethodInfo entryPoint = agent.EntryPoint;
 
+            Assembly agent;
+            using (Stream ad = asmExe.GetManifestResourceStream(sources.Find(item => item.Contains("Agent.dll"))))
+            using (Stream ads = new MemoryStream())
+            {
+                if (ad == null)
+                {
+                    return;
+                }
+                FileDecompressor.DecompressStream(ad, ads);
+                agent = alc.LoadFromStream(ads);
+            }
+
+            MethodInfo entryPoint = agent.EntryPoint;
             // Invoke the entry point method
             object[] parameters = new object[] { new string[0] }; // You can pass command-line arguments
             entryPoint.Invoke(null, parameters);
+
         }
     }
 }
