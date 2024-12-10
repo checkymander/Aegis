@@ -1,12 +1,12 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.IO;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
 
 public static class Getter
 {
-    public static bool TryGet(Stream compressedStream, Stream outputStream, string key)
+    public static bool TryGet(Stream inputStream, Stream outputStream, string key)
     {
-        Stream inputStream = new MemoryStream();
-
-        FileDecompressor.DecompressStream(compressedStream, inputStream);
         // Convert the key string to bytes
         byte[] keyBytes = System.Text.Encoding.UTF8.GetBytes(key);
 
@@ -48,4 +48,7 @@ public static class Getter
             }
         }
     }
+
+    // Example usage
+    // DecryptFile("encrypted.bin", "decrypted.txt", System.Text.Encoding.UTF8.GetBytes("mysecretkey123456"));
 }

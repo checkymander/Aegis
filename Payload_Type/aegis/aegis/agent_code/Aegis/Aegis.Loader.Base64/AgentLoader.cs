@@ -1,7 +1,6 @@
 ﻿using Aegis.Models.Interfaces;
 using System.IO;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
 using System.Runtime.Loader;
 
 namespace Aegis.Loader
@@ -71,19 +70,9 @@ namespace Aegis.Loader
         {
             var assembly = Assembly.GetExecutingAssembly();
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                if(stream is null)
-                {
-                    return string.Empty;
-                }
-
-                Stream dcStream = new MemoryStream();
-                FileDecompressor.DecompressStream(stream, dcStream);
-                using (StreamReader reader = new StreamReader(dcStream))
-                {
-                    return reader.ReadToEnd();
-                }
-
+                return reader.ReadToEnd();
             }
         }
         /// <summary>

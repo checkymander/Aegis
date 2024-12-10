@@ -18,7 +18,6 @@ import time
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import os
-import gzip
 
 class TestTempDir:
     def __init__(self, name):
@@ -104,19 +103,6 @@ class aegis(PayloadType):
         p = subprocess.Popen(["dotnet", "add", agent_type, "reference", project_path], cwd=agent_build_path.name)
         p.wait()
 
-    async def compress_file(self, input_file_path, output_file_path):
-        """
-        Compresses a file using gzip.
-
-        Args:
-            input_file_path (str): Path to the file to compress.
-            output_file_path (str): Path to save the compressed file.
-        """
-        with open(input_file_path, 'rb') as input_file:
-            with gzip.open(output_file_path, 'wb') as compressed_file:
-                shutil.copyfileobj(input_file, compressed_file)
-        print(f"File compressed and saved to {output_file_path}")
-
     async def encrypt_file(self, input_file_path, output_file_path, key_str):
         """
         Encrypts a file using AES encryption.
@@ -146,8 +132,6 @@ class aegis(PayloadType):
         # Write the IV and ciphertext to the output file
         with open(output_file_path, 'wb') as f:
             f.write(iv + ciphertext)
-
-        self.compress_file(output_file_path, output_file_path)
     
     async def encode_file(self, input_file_path, output_file_path):
         """
@@ -167,7 +151,6 @@ class aegis(PayloadType):
             logger.critical(f"Writing {output_file_path}")
             # Write the Base64 encoded content to the output file
             output_file.write(encoded_content)
-        self.compress_file(output_file, output_file)
         
 # Example usage
 # encrypt_file('example.txt', 'encrypted.bin', b'mysecretkey123456'
@@ -305,9 +288,7 @@ class aegis(PayloadType):
                 await self.encodeDlls(agent_build_path, agent_config_dict["assemblyname"])
             else:
                 #This just should rename the dll properly
-                dll_files = self.getAgentDlls(agent_build_path, agent_config_dict["assemblyname"])
-                await asyncio.gather(*[self.compress_file(os.path.join(agent_build_path.name,"AgentFiles",i), os.path.join(agent_build_path.name,"AgentFiles",i)) for i in dll_files])
-
+                self.getAgentDlls(agent_build_path, agent_config_dict["assemblyname"])
 
             # if str(self.get_parameter("obfuscation-type")).lower() != "plaintext":
             #     obfuscator_functions[str(self.get_parameter("obfuscation-type")).lower()]()
