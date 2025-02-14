@@ -10,11 +10,6 @@
 	<ItemGroup Condition="'$(Configuration)'=='DebugPlaintext'">
 		<ProjectReference Include="..\Aegis.Loader.Plaintext\Aegis.Loader.Plaintext.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\Aegis.Mod.Delay\Aegis.Mod.Delay.csproj" />
-		<ProjectReference Include="..\Aegis.Mod.DomainLookup\Aegis.Mod.DomainLookup.csproj" />
-		<ProjectReference Include="..\Aegis.Mod.PiCalc\Aegis.Mod.PiCalc.csproj" />
-	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)'=='DebugEncrypt'">
 		<ProjectReference Include="..\Aegis.Loader.Aes\Aegis.Loader.Aes.csproj" />
 	</ItemGroup>
